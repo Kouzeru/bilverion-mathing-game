@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Math Rush</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    font-family:Arial,Helvetica,sans-serif;
+    color:white;
+
+    background:
+        radial-gradient(circle at 20% 20%,#283d91 0%,transparent 30%),
+        radial-gradient(circle at 80% 80%,#722b91 0%,transparent 30%),
+        #070a18;
+
+    animation:bgMove 10s ease-in-out infinite alternate;
+}
+
+@keyframes bgMove{
+    from{background-position:0% 0%,100% 100%}
+    to{background-position:30% 20%,70% 80%}
+}
+
+/* Floating background particles */
+
+.particles{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:-1;
+}
+
+.particle{
+    position:absolute;
+    width:4px;
+    height:4px;
+    background:#6ff7ff;
+    border-radius:50%;
+    opacity:.5;
+    animation:float 8s linear infinite;
+}
+
+@keyframes float{
+    0%{
+        transform:translateY(110vh) scale(.5);
+        opacity:0;
+    }
+    20%{opacity:.7}
+    80%{opacity:.7}
+    100%{
+        transform:translateY(-10vh) scale(1.4);
+        opacity:0;
+    }
+}
+
+/* Main */
+
+.container{
+    width:min(950px,94%);
+    margin:35px auto;
+    padding:30px;
+
+    background:rgba(8,13,34,.88);
+    border:1px solid rgba(120,145,255,.35);
+    border-radius:28px;
+
+    box-shadow:
+        0 25px 80px #000b,
+        0 0 60px #4c65ff18;
+
+    backdrop-filter:blur(15px);
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* Title */
+
+.logo{
+    text-align:center;
+    font-size:clamp(42px,8vw,72px);
+    font-weight:900;
+    letter-spacing:4px;
+
+    background:linear-gradient(
+        90deg,
+        #6ff7ff,
+        #8b7cff,
+        #ff6ee8,
+        #6ff7ff
+    );
+
+    background-size:300%;
+    -webkit-background-clip:text;
+    color:transparent;
+
+    animation:logoMove 5s linear infinite;
+}
+
+@keyframes logoMove{
+    to{background-position:300%}
+}
+
+.subtitle{
+    text-align:center;
+    color:#aeb9df;
+    margin:8px 0 35px;
+}
+
+/* Difficulty */
+
+.difficulties{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.difficulty{
+    position:relative;
+    padding:25px;
+    border-radius:20px;
+    text-align:left;
+    overflow:hidden;
+
+    background:linear-gradient(
+        135deg,
+        #182348,
+        #10162e
+    );
+
+    transition:.25s;
+}
+
+.difficulty:hover{
+    transform:translateY(-7px) scale(1.015);
+    box-shadow:0 15px 35px #0008;
+}
+
+.difficulty h2{
+    margin-bottom:8px;
+}
+
+.difficulty p{
+    color:#aeb9df;
+    line-height:1.7;
+}
+
+.difficulty button{
+    width:100%;
+    margin-top:15px;
+}
+
+/* Buttons */
+
+button{
+    border:0;
+    padding:14px 20px;
+    border-radius:13px;
+
+    color:white;
+    font-weight:bold;
+    font-size:16px;
+
+    cursor:pointer;
+
+    background:#33447e;
+
+    transition:.18s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.25);
+}
+
+.easy{border:1px solid #55e89a}
+.medium{border:1px solid #50baff}
+.hard{border:1px solid #ffb34f}
+.extreme{border:1px solid #ff6060}
+
+.easy button{background:#208653}
+.medium button{background:#246c9b}
+.hard button{background:#9b641d}
+.extreme button{background:#9d3030}
+
+/* Stats */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:25px;
+}
+
+.stat{
+    padding:14px;
+    text-align:center;
+    border-radius:14px;
+    background:#151f42;
+    border:1px solid #293866;
+}
+
+.stat span{
+    display:block;
+    color:#8998c8;
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.stat b{
+    font-size:21px;
+}
+
+#timer{
+    color:#6ff7ff;
+}
+
+.timerDanger{
+    color:#ff6262!important;
+    animation:pulse .5s infinite alternate;
+}
+
+@keyframes pulse{
+    to{transform:scale(1.12)}
+}
+
+/* Progress */
+
+.progress{
+    width:100%;
+    height:7px;
+    background:#121a34;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:25px;
+}
+
+.progressBar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#6ff7ff,#7c6cff,#ff62dc);
+    transition:.3s;
+}
+
+/* Question */
+
+.questionBox{
+    min-height:300px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+.question{
+    font-size:clamp(27px,5vw,44px);
+    font-weight:900;
+    line-height:1.35;
+    margin:20px 0;
+    animation:questionIn .35s ease;
+}
+
+@keyframes questionIn{
+    from{
+        opacity:0;
+        transform:scale(.8) translateY(15px);
+    }
+    to{
+        opacity:1;
+        transform:scale(1) translateY(0);
+    }
+}
+
+/* Geometry */
+
+.geometry{
+    width:min(450px,100%);
+    height:220px;
+    margin-bottom:10px;
+}
+
+.geometry svg{
+    width:100%;
+    height:100%;
+}
+
+.geoLine{
+    stroke:#6ff7ff;
+    stroke-width:4;
+    fill:none;
+}
+
+.geoFill{
+    fill:#536cff22;
+    stroke:#6ff7ff;
+    stroke-width:4;
+}
+
+.geoText{
+    fill:white;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* Answer */
+
+.answerArea{
+    display:flex;
+    gap:10px;
+}
+
+#answer{
+    flex:1;
+    min-width:0;
+
+    padding:17px;
+
+    color:white;
+    background:#0c132d;
+
+    border:2px solid #2e4175;
+    border-radius:14px;
+
+    font-size:22px;
+    text-align:center;
+    outline:none;
+}
+
+#answer:focus{
+    border-color:#6f86ff;
+    box-shadow:0 0 20px #536cff33;
+}
+
+#submit{
+    background:#536cff;
+    min-width:150px;
+}
+
+/* Feedback */
+
+.feedback{
+    min-height:35px;
+    text-align:center;
+    font-weight:bold;
+    font-size:18px;
+    margin-top:15px;
+}
+
+.correct{
+    color:#62f5a4;
+    animation:feedback .4s;
+}
+
+.wrong{
+    color:#ff6868;
+    animation:feedback .4s;
+}
+
+@keyframes feedback{
+    50%{transform:scale(1.15)}
+}
+
+/* End */
+
+.end{
+    text-align:center;
+}
+
+.endTitle{
+    font-size:55px;
+    margin-bottom:10px;
+}
+
+.finalScore{
+    font-size:80px;
+    font-weight:900;
+    color:#6ff7ff;
+    text-shadow:0 0 30px #6ff7ff55;
+    margin:15px;
+}
+
+.review{
+    text-align:left;
+    max-height:360px;
+    overflow-y:auto;
+    margin:25px 0;
+    padding:10px;
+    background:#0d142b;
+    border-radius:15px;
+}
+
+.reviewItem{
+    padding:13px;
+    border-bottom:1px solid #27345b;
+    line-height:1.6;
+}
+
+.reviewCorrect{
+    color:#62f5a4;
+}
+
+.reviewWrong{
+    color:#ff6868;
+}
+
+.endButtons{
+    display:flex;
+    gap:12px;
+}
+
+.endButtons button{
+    flex:1;
+}
+
+@media(max-width:650px){
+
+    .container{
+        padding:18px;
+        margin:15px auto;
+    }
+
+    .difficulties{
+        grid-template-columns:1fr;
+    }
+
+    .stats{
+        gap:6px;
+    }
+
+    .stat{
+        padding:10px 5px;
+    }
+
+    .stat b{
+        font-size:16px;
+    }
+
+    .answerArea{
+        flex-direction:column;
+    }
+
+    #submit{
+        width:100%;
+    }
+
+    .endButtons{
+        flex-direction:column;
+    }
+}
+</style>
+</head>
+
+
+<body>
+
+<!-- BACKGROUND PARTICLES -->
+
+<div class="particles" id="particles"></div>
+
+
+<div class="container">
+
+<!-- ================= MENU ================= -->
+
+<section id="menu">
+
+    <div class="logo">
+        MATH RUSH
+    </div>
+
+    <div class="subtitle">
+        Think fast. Solve faster. Become the Math Master.
+    </div>
+
+    <div class="difficulties">
+
+        <!-- EASY -->
+
+        <div class="difficulty easy">
+
+            <h2>🟢 EASY</h2>
+
+            <p>
+                ➕ Addition<br>
+                ➖ Subtraction<br>
+                🔢 + and − numbers: <b>1–20</b><br>
+                ✖️ ÷ numbers: <b>1–10</b><br>
+                ⏱️ 10 seconds<br>
+                ⭐ 1 point
+            </p>
+
+            <button onclick="startGame('easy')">
+                START EASY
+            </button>
+
+        </div>
+
+
+        <!-- MEDIUM -->
+
+        <div class="difficulty medium">
+
+            <h2>🔵 MEDIUM</h2>
+
+            <p>
+                π Pi<br>
+                % Percentages<br>
+                √ Square roots<br>
+                🔢 Numbers: <b>1–50</b><br>
+                ⏱️ 30 seconds<br>
+                ⭐ 2–5 points
+            </p>
+
+            <button onclick="startGame('medium')">
+                START MEDIUM
+            </button>
+
+        </div>
+
+
+        <!-- HARD -->
+
+        <div class="difficulty hard">
+
+            <h2>🟠 HARD</h2>
+
+            <p>
+                📐 Geometry<br>
+                △ Triangles<br>
+                ▭ Rectangles<br>
+                ○ Circles<br>
+                🔢 Numbers: <b>1–100</b><br>
+                ⏱️ 1 minute<br>
+                ⭐ 5–10 points
+            </p>
+
+            <button onclick="startGame('hard')">
+                START HARD
+            </button>
+
+        </div>
+
+
+        <!-- EXTREME -->
+
+        <div class="difficulty extreme">
+
+            <h2>🔴 EXTREME</h2>
+
+            <p>
+                🧠 Mixed mathematics<br>
+                📐 Geometry<br>
+                π % √ + − × ÷<br>
+                🔢 Numbers: <b>1–150</b><br>
+                ⏱️ 3 minutes<br>
+                ⭐ 10–20 points
+            </p>
+
+            <button onclick="startGame('extreme')">
+                START EXTREME
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= GAME ================= -->
+
+<section id="game" class="hidden">
+
+    <div class="stats">
+
+        <div class="stat">
+            <span>QUESTION</span>
+            <b id="questionNumber">1 / 20</b>
+        </div>
+
+        <div class="stat">
+            <span>SCORE</span>
+            <b id="score">0</b>
+        </div>
+
+        <div class="stat">
+            <span>TIME</span>
+            <b id="timer">10s</b>
+        </div>
+
+    </div>
+
+
+    <div class="progress">
+        <div class="progressBar" id="progressBar"></div>
+    </div>
+
+
+    <div class="questionBox">
+
+        <div class="geometry hidden" id="geometry"></div>
+
+        <div class="question" id="question">
+            Loading...
+        </div>
+
+    </div>
+
+
+    <div class="answerArea">
+
+        <input
+            id="answer"
+            type="number"
+            step="any"
+            autocomplete="off"
+            placeholder="Type your answer..."
+        >
+
+        <button id="submit" onclick="submitAnswer()">
+            SUBMIT
+        </button>
+
+    </div>
+
+
+    <div class="feedback" id="feedback"></div>
+
+</section>
+
+
+<!-- ================= END ================= -->
+
+<section id="end" class="hidden end">
+
+    <div class="endTitle">
+        🏆 COMPLETE!
+    </div>
+
+    <p id="endMessage"></p>
+
+    <div class="finalScore" id="finalScore">
+        0
+    </div>
+
+    <p>POINTS</p>
+
+
+    <h2>📋 ANSWER HISTORY</h2>
+
+    <div class="review" id="review"></div>
+
+
+    <div class="endButtons">
+
+        <button onclick="playAgain()">
+            🔄 PLAY AGAIN
+        </button>
+
+        <button onclick="changeDifficulty()">
+            ⚙️ CHANGE DIFFICULTY
+        </button>
+
+    </div>
+
+</section>
+
+</div>
+
+
+<script>
+
+/* ================= PARTICLES ================= */
+
+const particles =
+document.getElementById("particles");
+
+for(let i=0;i<45;i++){
+
+    const p =
+    document.createElement("div");
+
+    p.className="particle";
+
+    p.style.left =
+        Math.random()*100+"%";
+
+    p.style.animationDelay =
+        Math.random()*8+"s";
+
+    p.style.animationDuration =
+        (5+Math.random()*8)+"s";
+
+    particles.appendChild(p);
+}
+
+
+/* ================= SETTINGS ================= */
+
+const settings = {
+
+    easy:{
+        time:10,
+        minPoints:1,
+        maxPoints:1
+    },
+
+    medium:{
+        time:30,
+        minPoints:2,
+        maxPoints:5
+    },
+
+    hard:{
+        time:60,
+        minPoints:5,
+        maxPoints:10
+    },
+
+    extreme:{
+        time:180,
+        minPoints:10,
+        maxPoints:20
+    }
+
+};
+
+
+/* ================= VARIABLES ================= */
+
+let difficulty;
+let score=0;
+let questionNumber=0;
+let currentQuestion=null;
+let timeLeft=0;
+let timerInterval=null;
+let results=[];
+
+
+/* ================= RANDOM ================= */
+
+function random(min,max){
+
+    return Math.floor(
+        Math.random()*(max-min+1)
+    )+min;
+
+}
+
+
+function round(num){
+
+    return Math.round(num*100)/100;
+
+}
+
+
+/* ================= START ================= */
+
+function startGame(level){
+
+    difficulty=level;
+
+    score=0;
+
+    questionNumber=0;
+
+    results=[];
+
+    document
+        .getElementById("menu")
+        .classList.add("hidden");
+
+    document
+        .getElementById("end")
+        .classList.add("hidden");
+
+    document
+        .getElementById("game")
+        .classList.remove("hidden");
+
+    nextQuestion();
+
+}
+
+
+/* ================= NEXT QUESTION ================= */
+
+function nextQuestion(){
+
+    if(questionNumber>=20){
+
+        finishGame();
+
+        return;
+    }
+
+    questionNumber++;
+
+    document.getElementById("questionNumber")
+        .textContent =
+        questionNumber+" / 20";
+
+    document.getElementById("score")
+        .textContent=score;
+
+
+    const progress =
+        ((questionNumber-1)/20)*100;
+
+    document.getElementById("progressBar")
+        .style.width=progress+"%";
+
+
+    currentQuestion =
+        generateQuestion(difficulty);
+
+
+    document.getElementById("question")
+        .textContent=currentQuestion.text;
+
+
+    const geometry =
+        document.getElementById("geometry");
+
+    if(currentQuestion.svg){
+
+        geometry.innerHTML =
+            currentQuestion.svg;
+
+        geometry.classList.remove("hidden");
+
+    }else{
+
+        geometry.innerHTML="";
+        geometry.classList.add("hidden");
+
+    }
+
+
+    document.getElementById("answer")
+        .value="";
+
+    document.getElementById("feedback")
+        .textContent="";
+
+    document.getElementById("feedback")
+        .className="feedback";
+
+
+    timeLeft =
+        settings[difficulty].time;
+
+    updateTimer();
+
+
+    clearInterval(timerInterval);
+
+
+    timerInterval =
+        setInterval(()=>{
+
+            timeLeft--;
+
+            updateTimer();
+
+            if(timeLeft<=0){
+
+                clearInterval(timerInterval);
+
+                processAnswer(null,true);
+
+            }
+
+        },1000);
+
+
+    document.getElementById("answer")
+        .focus();
+
+}
+
+
+/* ================= TIMER ================= */
+
+function updateTimer(){
+
+    const timer =
+        document.getElementById("timer");
+
+    timer.textContent =
+        timeLeft+"s";
+
+    if(timeLeft<=5){
+
+        timer.classList.add("timerDanger");
+
+    }else{
+
+        timer.classList.remove("timerDanger");
+
+    }
+
+}
+
+
+/* ================= SVG ================= */
+
+function triangleSVG(base,height){
+
+    return `
+    <svg viewBox="0 0 450 220">
+
+        <polygon
+            class="geoFill"
+            points="80,180 370,180 80,50"
+        />
+
+        <line
+            class="geoLine"
+            x1="80"
+            y1="50"
+            x2="80"
+            y2="180"
+        />
+
+        <text
+            class="geoText"
+            x="210"
+            y="205">
+            base = ${base}
+        </text>
+
+        <text
+            class="geoText"
+            x="25"
+            y="120">
+            h = ${height}
+        </text>
+
+        <rect
+            x="80"
+            y="165"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="#6ff7ff"
+            stroke-width="2"
+        />
+
+    </svg>`;
+}
+
+
+function rectangleSVG(length,width){
+
+    return `
+    <svg viewBox="0 0 450 220">
+
+        <rect
+            class="geoFill"
+            x="70"
+            y="50"
+            width="310"
+            height="120"
+        />
+
+        <text
+            class="geoText"
+            x="190"
+            y="200">
+            length = ${length}
+        </text>
+
+        <text
+            class="geoText"
+            x="10"
+            y="115">
+            width = ${width}
+        </text>
+
+    </svg>`;
+}
+
+
+function squareSVG(side){
+
+    return `
+    <svg viewBox="0 0 450 220">
+
+        <rect
+            class="geoFill"
+            x="125"
+            y="25"
+            width="170"
+            height="170"
+        />
+
+        <text
+            class="geoText"
+            x="195"
+            y="215">
+            side = ${side}
+        </text>
+
+    </svg>`;
+}
+
+
+function circleSVG(radius){
+
+    return `
+    <svg viewBox="0 0 450 220">
+
+        <circle
+            class="geoFill"
+            cx="225"
+            cy="110"
+            r="80"
+        />
+
+        <line
+            class="geoLine"
+            x1="225"
+            y1="110"
+            x2="305"
+            y2="110"
+        />
+
+        <text
+            class="geoText"
+            x="250"
+            y="100">
+            r = ${radius}
+        </text>
+
+    </svg>`;
+}
+
+
+/* ================= QUESTION GENERATOR ================= */
+
+function generateQuestion(level){
+
+    let a,b,c;
+    let answer;
+    let text;
+    let svg=null;
+
+
+    /* ===== EASY ===== */
+
+    if(level==="easy"){
+
+        const operation=random(1,4);
+
+        if(operation===1){
+
+            a=random(1,20);
+            b=random(1,20);
+
+            text=`${a} + ${b} = ?`;
+
+            answer=a+b;
+
+        }
+
+        else if(operation===2){
+
+            a=random(1,20);
+            b=random(1,20);
+
+            text=`${a} − ${b} = ?`;
+
+            answer=a-b;
+
+        }
+
+        else if(operation===3){
+
+            a=random(1,10);
+            b=random(1,10);
+
+            text=`${a} × ${b} = ?`;
+
+            answer=a*b;
+
+        }
+
+        else{
+
+            b=random(1,10);
+
+            const result=random(1,10);
+
+            a=b*result;
+
+            text=`${a} ÷ ${b} = ?`;
+
+            answer=result;
+
+        }
+
+    }
+
+
+    /* ===== MEDIUM ===== */
+
+    else if(level==="medium"){
+
+        const type=random(1,5);
+
+        if(type===1){
+
+            a=random(1,50);
+            b=random(1,50);
+
+            text=`${a}π + ${b}π = ?π`;
+
+            answer=a+b;
+
+        }
+
+        else if(type===2){
+
+            a=random(1,50);
+            b=random(1,50);
+
+            text=`${a}% of ${b} = ?`;
+
+            answer=round(a*b/100);
+
+        }
+
+        else if(type===3){
+
+            a=random(1,50);
+
+            const square=a*a;
+
+            text=`√${square} = ?`;
+
+            answer=a;
+
+        }
+
+        else if(type===4){
+
+            a=random(1,50);
+            b=random(1,50);
+
+            text=`${a} + √${b*b} × 2 = ?`;
+
+            answer=a+b*2;
+
+        }
+
+        else{
+
+            a=random(1,50);
+            b=random(1,50);
+
+            text=`${a}% of ${b*b} + √${b*b} = ?`;
+
+            answer=round((a/100)*(b*b)+b);
+
+        }
+
+    }
+
+
+    /* ===== HARD ===== */
+
+    else if(level==="hard"){
+
+        const type=random(1,4);
+
+        if(type===1){
+
+            const base=random(1,100);
+            const height=random(1,100);
+
+            text=
+                `Triangle: Find the area`;
+
+            answer=
+                round(base*height/2);
+
+            svg=
+                triangleSVG(base,height);
+
+        }
+
+        else if(type===2){
+
+            const length=random(1,100);
+            const width=random(1,100);
+
+            text=
+                `Rectangle: Find the area`;
+
+            answer=
+                length*width;
+
+            svg=
+                rectangleSVG(length,width);
+
+        }
+
+        else if(type===3){
+
+            const side=random(1,100);
+
+            text=
+                `Square: Find the area`;
+
+            answer=
+                side*side;
+
+            svg=
+                squareSVG(side);
+
+        }
+
+        else{
+
+            const radius=random(1,50);
+
+            text=
+                `Circle: Find the area. Use π = 3.14`;
+
+            answer=
+                round(3.14*radius*radius);
+
+            svg=
+                circleSVG(radius);
+
+        }
+
+    }
+
+
+    /* ===== EXTREME ===== */
+
+    else{
+
+        const type=random(1,6);
+
+
+        if(type===1){
+
+            a=random(1,150);
+            b=random(1,150);
+
+            text=
+                `(${a}² + √${b*b}) ÷ 2 = ?`;
+
+            answer=
+                round((a*a+b)/2);
+
+        }
+
+
+        else if(type===2){
+
+            const radius=random(1,50);
+            const percent=random(1,100);
+
+            text=
+                `${percent}% of a circle with radius ${radius}. Use π = 3.14`;
+
+            answer=
+                round(
+                    3.14*
+                    radius*
+                    radius*
+                    percent/100
+                );
+
+            svg=
+                circleSVG(radius);
+
+        }
+
+
+        else if(type===3){
+
+            const base=random(1,100);
+            const height=random(1,100);
+            const percent=random(1,100);
+
+            text=
+                `Triangle area + ${percent}% of its area`;
+
+            const area=
+                base*height/2;
+
+            answer=
+                round(
+                    area+
+                    area*percent/100
+                );
+
+            svg=
+                triangleSVG(base,height);
+
+        }
+
+
+        else if(type===4){
+
+            const a=random(1,100);
+            const b=random(1,100);
+
+            text=
+                `Right triangle: Find the hypotenuse`;
+
+            answer=
+                round(
+                    Math.sqrt(
+                        a*a+b*b
+                    )
+                );
+
+            svg=
+                triangleSVG(a,b);
+
+        }
+
+
+        else if(type===5){
+
+            a=random(1,150);
+            b=random(1,150);
+            c=random(1,100);
+
+            text=
+                `(${a} × ${b}) + ${c}% of ${a} = ?`;
+
+            answer=
+                round(
+                    a*b+
+                    a*c/100
+                );
+
+        }
+
+
+        else{
+
+            const radius=random(1,50);
+            const percent=random(1,100);
+            const extra=random(1,150);
+
+            text=
+                `Circle area × ${percent}% + ${extra}`;
+
+            answer=
+                round(
+                    3.14*
+                    radius*
+                    radius*
+                    percent/100+
+                    extra
+                );
+
+            svg=
+                circleSVG(radius);
+
+        }
+
+    }
+
+
+    return{
+        text:text,
+        answer:answer,
+        svg:svg
+    };
+
+}
+
+
+/* ================= SUBMIT ================= */
+
+function submitAnswer(){
+
+    if(timeLeft<=0)return;
+
+    clearInterval(timerInterval);
+
+    const value=
+        Number(
+            document.getElementById("answer").value
+        );
+
+    processAnswer(value,false);
+
+}
+
+
+/* ================= CHECK ================= */
+
+function processAnswer(value,timedOut){
+
+    let correct=false;
+
+    if(!timedOut && value!==null){
+
+        correct=
+            Math.abs(
+                value-currentQuestion.answer
+            )<0.01;
+
+    }
+
+
+    let earned=0;
+
+
+    if(correct){
+
+        earned=
+            random(
+                settings[difficulty].minPoints,
+                settings[difficulty].maxPoints
+            );
+
+        score+=earned;
+
+        showFeedback(
+            `✓ CORRECT! +${earned} POINTS`,
+            true
+        );
+
+    }
+
+    else{
+
+        if(timedOut){
+
+            showFeedback(
+                `⏰ TIME'S UP! Answer: ${round(currentQuestion.answer)}`,
+                false
+            );
+
+        }else{
+
+            showFeedback(
+                `✕ WRONG! Answer: ${round(currentQuestion.answer)}`,
+                false
+            );
+
+        }
+
+    }
+
+
+    results.push({
+
+        question:currentQuestion.text,
+
+        user:
+            timedOut
+            ?"Time's up"
+            :value,
+
+        correct:correct,
+
+        answer:round(currentQuestion.answer),
+
+        points:earned
+
+    });
+
+
+    document.getElementById("score")
+        .textContent=score;
+
+
+    setTimeout(
+        nextQuestion,
+        900
+    );
+
+}
+
+
+/* ================= FEEDBACK ================= */
+
+function showFeedback(message,correct){
+
+    const feedback=
+        document.getElementById("feedback");
+
+    feedback.textContent=message;
+
+    feedback.className=
+        "feedback "+
+        (correct?"correct":"wrong");
+
+}
+
+
+/* ================= FINISH ================= */
+
+function finishGame(){
+
+    clearInterval(timerInterval);
+
+    document.getElementById("game")
+        .classList.add("hidden");
+
+    document.getElementById("end")
+        .classList.remove("hidden");
+
+
+    document.getElementById("finalScore")
+        .textContent=score;
+
+
+    document.getElementById("endMessage")
+        .textContent=
+        `You completed all 20 ${difficulty.toUpperCase()} questions!`;
+
+
+    const review=
+        document.getElementById("review");
+
+    review.innerHTML="";
+
+
+    results.forEach((r,i)=>{
+
+        const div=
+            document.createElement("div");
+
+        div.className="reviewItem";
+
+
+        div.innerHTML=`
+
+            <b>${i+1}. ${r.question}</b>
+
+            <br>
+
+            Your answer:
+            <b>${r.user}</b>
+
+            <br>
+
+            Correct answer:
+            <b>${r.answer}</b>
+
+            <br>
+
+            <span class="${
+                r.correct
+                ?"reviewCorrect"
+                :"reviewWrong"
+            }">
+
+                ${
+                    r.correct
+                    ?`✓ Correct (+${r.points})`
+                    :"✕ Incorrect"
+                }
+
+            </span>
+
+        `;
+
+        review.appendChild(div);
+
+    });
+
+}
+
+
+/* ================= PLAY AGAIN ================= */
+
+function playAgain(){
+
+    startGame(difficulty);
+
+}
+
+
+/* ================= CHANGE ================= */
+
+function changeDifficulty(){
+
+    clearInterval(timerInterval);
+
+    document.getElementById("end")
+        .classList.add("hidden");
+
+    document.getElementById("game")
+        .classList.add("hidden");
+
+    document.getElementById("menu")
+        .classList.remove("hidden");
+
+}
+
+
+/* ================= ENTER KEY ================= */
+
+document
+.getElementById("answer")
+.addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key==="Enter"){
+
+            submitAnswer();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
